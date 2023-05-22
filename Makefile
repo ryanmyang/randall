@@ -51,3 +51,10 @@ repository-tarball:
 
 clean:
 	rm -f *.o *.$(TAREXT) randall
+
+
+check: randall
+	@echo "Running tests..."
+	./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test valid" || echo "Length 10 test failed"
+	./randall 453 | wc -c | grep -q '^453$$' && echo "Length 453 test valid" || echo "Length 453 test failed"
+
