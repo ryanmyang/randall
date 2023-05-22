@@ -1,6 +1,8 @@
 #include "options.h"
 #include <stdbool.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void parse_options(struct options *o, int argc, char **argv) {
     if (argc == 2)

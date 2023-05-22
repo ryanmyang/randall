@@ -33,8 +33,14 @@ default: randall
 options.o: options.c options.h
 	$(CC) $(CFLAGS) -c options.c -o options.o
 
-randall: randall.c options.o
-	$(CC) $(CFLAGS) $@.c options.o -o $@
+output.o: output.c output.h
+	$(CC) $(CFLAGS) -c output.c -o output.o
+
+rand64-hw.o: rand64-hw.c rand64-hw.h
+	$(CC) $(CFLAGS) -c rand64-hw.c -o rand64-hw.o
+
+randall: randall.c options.o output.o rand64-hw.o
+	$(CC) $(CFLAGS) $@.c options.o output.o rand64-hw.o -o $@
 
 assignment: randall-assignment.$(TAREXT)
 assignment-files = COPYING Makefile randall.c

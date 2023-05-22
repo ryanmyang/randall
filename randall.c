@@ -29,59 +29,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "options.h"
+#include "output.h"
+#include "rand64-hw.h"
 
 /* Hardware implementation.  */
 
-/* Description of the current CPU.  */
-struct cpuid { unsigned eax, ebx, ecx, edx; };
 
-/* Return information about the CPU.  See <http://wiki.osdev.org/CPUID>.  */
-static struct cpuid
-cpuid (unsigned int leaf, unsigned int subleaf)
-{
-  struct cpuid result;
-  asm ("cpuid"
-       : "=a" (result.eax), "=b" (result.ebx),
-	 "=c" (result.ecx), "=d" (result.edx)
-       : "a" (leaf), "c" (subleaf));
-  return result;
-}
-
-/* Return true if the CPU supports the RDRAND instruction.  */
-static _Bool
-rdrand_supported (void)
-{
-  struct cpuid extended = cpuid (1, 0);
-  return (extended.ecx & bit_RDRND) != 0;
-}
-
-/* Initialize the hardware rand64 implementation.  */
-static void
-hardware_rand64_init (void)
-{
-}
-
-/* Return a random value, using hardware operations.  */
-static unsigned long long
-hardware_rand64 (void)
-{
-  unsigned long long int x;
-
-  /* Work around GCC bug 107565
-     <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107565>.  */
-  x = 0;
-
-  while (! _rdrand64_step (&x))
-    continue;
-  return x;
-}
-
-/* Finalize the hardware rand64 implementation.  */
-static void
-hardware_rand64_fini (void)
-{
-}
 
 
 
@@ -114,21 +69,6 @@ static void
 software_rand64_fini (void)
 {
   fclose (urandstream);
-}
-
-static bool
-writebytes (unsigned long long x, int nbytes)
-{
-  do
-    {
-      if (putchar (x) < 0)
-	return false;
-      x >>= CHAR_BIT;
-      nbytes--;
-    }
-  while (0 < nbytes);
-
-  return true;
 }
 
 /* Main program, which outputs N bytes of random data.  */
