@@ -39,8 +39,11 @@ output.o: output.c output.h
 rand64-hw.o: rand64-hw.c rand64-hw.h
 	$(CC) $(CFLAGS) -c rand64-hw.c -o rand64-hw.o
 
-randall: randall.c options.o output.o rand64-hw.o
-	$(CC) $(CFLAGS) $@.c options.o output.o rand64-hw.o -o $@
+rand64-sw.o: rand64-sw.c rand64-sw.h
+	$(CC) $(CFLAGS) -c rand64-sw.c -o rand64-sw.o
+
+randall: randall.c options.o output.o rand64-hw.o rand64-sw.o
+	$(CC) $(CFLAGS) $@.c options.o output.o rand64-hw.o rand64-sw.o -o $@
 
 assignment: randall-assignment.$(TAREXT)
 assignment-files = COPYING Makefile randall.c
