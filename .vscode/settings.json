@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "stdbool.h": "c",
-        "rand64-hw.h": "c"
+        "rand64-hw.h": "c",
+        "stdio.h": "c"
     }
 }

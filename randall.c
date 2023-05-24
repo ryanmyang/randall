@@ -29,47 +29,20 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "options.h"
 #include "output.h"
 #include "rand64-hw.h"
+#include "rand64-sw.h"
 
 /* Hardware implementation.  */
-
-
 
 
 
 /* Software implementation.  */
 
 /* Input stream containing random bytes.  */
-static FILE *urandstream;
-
-/* Initialize the software rand64 implementation.  */
-static void
-software_rand64_init (void)
-{
-  urandstream = fopen ("/dev/random", "r");
-  if (! urandstream)
-    abort ();
-}
-
-/* Return a random value, using software operations.  */
-static unsigned long long
-software_rand64 (void)
-{
-  unsigned long long int x;
-  if (fread (&x, sizeof x, 1, urandstream) != 1)
-    abort ();
-  return x;
-}
-
-/* Finalize the software rand64 implementation.  */
-static void
-software_rand64_fini (void)
-{
-  fclose (urandstream);
-}
 
 /* Main program, which outputs N bytes of random data.  */
 int
@@ -99,11 +72,25 @@ main (int argc, char **argv)
   void (*initialize) (void);
   unsigned long long (*rand64) (void);
   void (*finalize) (void);
-  if (rdrand_supported ())
+
+const int input_option = o.input_option;
+printf("input_option: %d \n", input_option);
+assert(input_option>=0 && input_option<=2);
+
+  if (input_option==0)
     {
+      if (!rdrand_supported()) {
+        fprintf(stderr, "rdrand not supported");
+      }
       initialize = hardware_rand64_init;
       rand64 = hardware_rand64;
       finalize = hardware_rand64_fini;
+    }
+    else if (input_option == 1)
+    {
+      initialize = software_mrand48_init;
+      rand64 = software_mrand48;
+      finalize = software_mrand48_fini;
     }
   else
     {
