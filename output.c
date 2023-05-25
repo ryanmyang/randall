@@ -54,7 +54,7 @@ bool writebytes(unsigned long long x, int nbytes)
     int total_bytes_written = 0;
     while (total_bytes_written < nbytes)
     {
-        int bytes_written = write(1, output_buffer + total_bytes_written, nbytes - total_bytes_written);
+        int bytes_written=write(1,output_buffer +total_bytes_written,nbytes -total_bytes_written);
         if (bytes_written < 0)
             return false;
         total_bytes_written += bytes_written;

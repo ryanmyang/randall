@@ -1,4 +1,5 @@
 ----------------- TIMING INFORMATION -----------------
+
 time ./randall 133562368 >/dev/null
 real	0m3.954s
 user	0m3.906s
@@ -19,17 +20,24 @@ sys	0m0.115s
 
 I first added tests which were pretty simple to add:
 @echo "Running tests..."
-	./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test valid" || echo "Length 10 test failed"
-	./randall 453 | wc -c | grep -q '^453$$' && echo "Length 453 test valid" || echo "Length 453 test failed"
+./randall 10 | wc -c | grep -q '^10$$' \
+&& echo "Length 10 test valid" || echo "Length 10 test failed"
+./randall 453 | wc -c | grep -q '^453$$' \
+&& echo "Length 453 test valid" || echo "Length 453 test failed"
 
-Then I started moving out pieces, but was having trouble figuring out which parts belonged where. I also kept running into forgetting about adding the dependencies into the makefiles. Also it wasn't compiling on my mac so I had to transfer it to the server to run so I made an sh file to make it faster to sync:
+Then I started moving out pieces, but was having trouble figuring out which parts belonged where. 
+I also kept running into forgetting about adding the dependencies into the makefiles. 
+Also it wasn't compiling on my mac so I had to transfer it to the 
+server to run so I made an sh file to make it faster to sync:
 
 #!/bin/bash
 rsync -avz ./ ryany@cs35l.seas.ucla.edu:CS35L/Assignment5/
 
-I kept not realizing which includes were needed which was a bit annoying but I ended up getting them all in. 
+I kept not realizing which includes were needed which was a bit annoying.
+I ended up getting them all in. 
 
-To handle the options I made a struct to hold all of the data and initialized the struct in the main randall file.
+To handle the options I made a struct to hold all of the data.
+And I initialized the struct in the main randall file.
 struct options {
     bool valid;
     long long nbytes;
@@ -38,7 +46,38 @@ This is the struct for now.
 
 Most of the transferring was just copy paste and fix includes.
 
-Then I added the processing of the arguments by basically looking to see if any valid arguments had '-i', then I look at the next argument and see if it matches rdrand, mrand48_r, or starts with a slash. Then I store the input option that was chosen into the options struct.
+Then I added the processing of the arguments by just looking to see if any valid args had '-i'
+Then I look at the next argument and see if it matches rdrand, mrand48_r, or starts with a slash.
+Then I store the input option that was chosen into the options struct.
+void handle_input(struct options *o, char *input)
+{
+    // printf("handling input");
+    if (strcmp(input, "rdrand") == 0)
+    {
+        return;
+    }
+    else if (input[0] == '/' && strlen(input) > 1)
+    {
+        // printf("detected slash");
+        o->input_option = 2;
+        // o->file = input;
+        // printf("file: %s", o->file);
+        // printf("about to set file as input");
+        set_file(input);
+    }
+    else if (strcmp(input, "mrand48_r") == 0)
+    {
+        o->input_option = 1;
+    }
+    else
+    {
+        o->valid = false;
+        o->input_option = -1;
+    }
+    // printf("handled input");
+}
+
+
 
 Figuring out mrand48_r was a pain but I think I figured it out:
 
@@ -54,7 +93,13 @@ unsigned long randomValue;
     return randomValue;
 
 
-While trying to add the input file features, I ran into the issue where I could not make the rand64 function pointer point to a function where I passed in the file as an argument and I was stuck for a bit on what to do. I decided on making another function in the software code that was called during options processing, and changed a static variable in the software code so that it would store the input file right away so I wouldn't have to pass it in during the calling of the random functions.
+While trying to add the input file features, 
+I ran into the issue where I could not make the rand64 function pointer point to a function where I 
+passed in the file as an argument and I was stuck for a bit on what to do. 
+I decided on making another function in the software code that was 
+called during options processing
+I changed a static variable in the software code so that it would store the input file right away.
+That way I wouldn't have to pass it in during the calling of the random functions.
 
 void set_file(char *file) {
     // printf("setting file");
@@ -65,10 +110,64 @@ void set_file(char *file) {
     }
 }
 
-I also ran into an abort issue but that ended up being caused by misplaced brackets after an if statement. This is why when I write if statements, that I like to always use the brackets even if it starts as one line long.
+I also ran into an abort issue,
+but that ended up being caused by misplaced brackets after an if statement. 
+This is why when I write if statements,
+I like to always use the brackets even if it starts as one line long.
 
-For output, I basically copied my handleinput function so that I can just pass in whatever is being output to validate and process it, which made it pretty easy.
-I had issues a few times because of stupid things like forgetting to check ==0 for some string comparisons, so I was actually checking for the opposite of what I wanted to
+For output processing, I basically copied my handleinput function so that I can 
+just pass in whatever is being output to validate and process it, which made it pretty easy.
 
-I added a bunch of test cases and tried to hit all of the combinations and just checked that they were running correctly and outputting the correct amount of bytes of random info.
+void handle_output(struct options *o, char *output)
+{
+    // printf("handling output");
+    if (strcmp(output, "stdio") == 0)
+    {
+        o->output_option = 0;
+    }
+    else if (is_positive_integer(output)==1)
+    {
+        // printf("pos int");
 
+        o->output_option = 1;
+        set_buffer_size(atoi(output));
+    }
+    else {
+        o->valid = false;
+        o->output_option = -1;
+    }
+    
+}
+I had issues a few times because of stupid things like forgetting to 
+check ==0 for some string comparisons.
+(I was actually checking for the opposite of what I wanted to)
+
+I added a bunch of test cases and tried to hit all of the 
+combinations and just checked that they were running correctly and 
+outputting the correct amount of bytes of random info.
+I ran out of space because I forgot about the 100 column per line 
+requirement so I removed all of the echo statements from the tests, 
+this is what it looked like before (backslashes before newlines):
+
+./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test \
+valid" || echo "Length 10 test failed"
+./randall 453 | wc -c | grep -q '^453$$' && echo "Length 453 test \
+valid" || echo "Length 453 test failed"
+./randall 111 -i rdrand | wc -c | grep -q '^111$$' \
+&& echo "rdrand 111 test valid" || echo "rdrand 111 test failed"
+./randall 222 -i mrand48_r | wc -c | grep -q '^222$$' \
+&& echo "mrand48_r 222 test valid" || echo "mrand48_r 222 test failed"
+./randall 333 -i /dev/random | wc -c | grep -q '^333$$' \
+&& echo "/dev/random 333 test valid" || echo "/dev/random 333 test failed"
+./randall 323 -i /dev/urandom | wc -c | grep -q '^323$$' \
+&& echo "/dev/urandom 323 test valid" || echo "/dev/urandom 323 test failed"
+./randall 123 -o stdio | wc -c | grep -q '^123$$' \
+&& echo "stdio 123 test valid" || echo "stdio 123 test failed"
+./randall 456 -o 30 | wc -c | grep -q '^456$$' \
+&& echo "write 456 test valid" || echo "write 456 test failed"
+./randall 111 -i rdrand -o stdio | wc -c | grep -q '^111$$' \
+&& echo "rdrand + stdio 111 test valid" || echo "rdrand + stdio 111 test failed"
+./randall 222 -i mrand48_r -o stdio | wc -c | grep -q '^222$$' \
+&& echo "mrand48_r + stdio 222 test valid" || echo "mrand48_r + stdio 222 test failed"
+./randall 333 -i /dev/random -o stdio | wc -c | grep -q '^333$$' \
+&& echo "/dev/random + stdio 333 test valid" || echo "/dev/random + stdio 333 test failed"
