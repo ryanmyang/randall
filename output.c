@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 static int output_mode = 0;
 static unsigned char *output_buffer = NULL;

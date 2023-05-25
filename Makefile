@@ -69,6 +69,12 @@ check: randall
 	@echo "Running tests..."
 	./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test valid" || echo "Length 10 test failed"
 	./randall 453 | wc -c | grep -q '^453$$' && echo "Length 453 test valid" || echo "Length 453 test failed"
-	./randall 180 -i rdrand | wc -c | grep -q '^180$$' && echo "rdrand 180 test valid" || echo "rdrand 180 test failed"
-
-
+	./randall 111 -i rdrand | wc -c | grep -q '^111$$' && echo "rdrand 111 test valid" || echo "rdrand 111 test failed"
+	./randall 222 -i mrand48_r | wc -c | grep -q '^222$$' && echo "mrand48_r 222 test valid" || echo "mrand48_r 222 test failed"
+	./randall 333 -i /dev/random | wc -c | grep -q '^333$$' && echo "/dev/random 333 test valid" || echo "/dev/random 333 test failed"
+	./randall 323 -i /dev/urandom | wc -c | grep -q '^323$$' && echo "/dev/urandom 323 test valid" || echo "/dev/urandom 323 test failed"
+	./randall 123 -o stdio | wc -c | grep -q '^123$$' && echo "stdio 123 test valid" || echo "stdio 123 test failed"
+	./randall 456 -o 30 | wc -c | grep -q '^456$$' && echo "write 456 test valid" || echo "write 456 test failed"
+	./randall 111 -i rdrand -o stdio | wc -c | grep -q '^111$$' && echo "rdrand + stdio 111 test valid" || echo "rdrand + stdio 111 test failed"
+	./randall 222 -i mrand48_r -o stdio | wc -c | grep -q '^222$$' && echo "mrand48_r + stdio 222 test valid" || echo "mrand48_r + stdio 222 test failed"
+	./randall 333 -i /dev/random -o stdio | wc -c | grep -q '^333$$' && echo "/dev/random + stdio 333 test valid" || echo "/dev/random + stdio 333 test failed"

@@ -106,12 +106,13 @@ void parse_options(struct options *o, int argc, char **argv) {
                 {
                     handle_input(o, argv[5]);
                 }
-                else if (strcmp(argv[4], "-o"))
+                else if (strcmp(argv[4], "-o") == 0)
                 {
                     handle_output(o, argv[5]);
                 }
                 else
                 {
+                    printf("invalid arg6");
                     o->valid = false;
                     return;
                 }

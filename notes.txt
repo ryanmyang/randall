@@ -1,3 +1,22 @@
+----------------- TIMING INFORMATION -----------------
+time ./randall 133562368 >/dev/null
+real	0m3.954s
+user	0m3.906s
+sys	0m0.020s
+
+time ./randall 133562368 | cat >/dev/null
+real	0m4.241s
+user	0m4.010s
+sys	0m0.235s
+
+time ./randall 133562368 >rand.data
+real	0m5.814s
+user	0m3.977s
+sys	0m0.115s
+
+
+----------------- LOG -----------------
+
 I first added tests which were pretty simple to add:
 @echo "Running tests..."
 	./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test valid" || echo "Length 10 test failed"
@@ -49,4 +68,7 @@ void set_file(char *file) {
 I also ran into an abort issue but that ended up being caused by misplaced brackets after an if statement. This is why when I write if statements, that I like to always use the brackets even if it starts as one line long.
 
 For output, I basically copied my handleinput function so that I can just pass in whatever is being output to validate and process it, which made it pretty easy.
+I had issues a few times because of stupid things like forgetting to check ==0 for some string comparisons, so I was actually checking for the opposite of what I wanted to
+
+I added a bunch of test cases and tried to hit all of the combinations and just checked that they were running correctly and outputting the correct amount of bytes of random info.
 
