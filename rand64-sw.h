@@ -7,7 +7,7 @@ void software_rand64_init(void);
 unsigned long long software_rand64(void);
 /* Finalize the software rand64 implementation.  */
 void software_rand64_fini(void);
-
+void set_file(char* file);
 void software_mrand48_init(void);
 unsigned long long software_mrand48(void);
 void software_mrand48_fini(void);

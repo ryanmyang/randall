@@ -1,0 +1,52 @@
+I first added tests which were pretty simple to add:
+@echo "Running tests..."
+	./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test valid" || echo "Length 10 test failed"
+	./randall 453 | wc -c | grep -q '^453$$' && echo "Length 453 test valid" || echo "Length 453 test failed"
+
+Then I started moving out pieces, but was having trouble figuring out which parts belonged where. I also kept running into forgetting about adding the dependencies into the makefiles. Also it wasn't compiling on my mac so I had to transfer it to the server to run so I made an sh file to make it faster to sync:
+
+#!/bin/bash
+rsync -avz ./ ryany@cs35l.seas.ucla.edu:CS35L/Assignment5/
+
+I kept not realizing which includes were needed which was a bit annoying but I ended up getting them all in. 
+
+To handle the options I made a struct to hold all of the data and initialized the struct in the main randall file.
+struct options {
+    bool valid;
+    long long nbytes;
+};
+This is the struct for now.
+
+Most of the transferring was just copy paste and fix includes.
+
+Then I added the processing of the arguments by basically looking to see if any valid arguments had '-i', then I look at the next argument and see if it matches rdrand, mrand48_r, or starts with a slash. Then I store the input option that was chosen into the options struct.
+
+Figuring out mrand48_r was a pain but I think I figured it out:
+
+FILE *randomFile = fopen("/dev/random", "rb");
+
+unsigned short seed[3];
+size_t bytesRead = fread(seed, sizeof(unsigned short), 3, randomFile);
+fclose(randomFile);
+seed48_r(seed, &randomBuffer);
+unsigned long randomValue;
+    mrand48_r(&randomBuffer, (long *)&randomValue);
+    printf("mrand48 randomValue: %d \n", randomValue);
+    return randomValue;
+
+
+While trying to add the input file features, I ran into the issue where I could not make the rand64 function pointer point to a function where I passed in the file as an argument and I was stuck for a bit on what to do. I decided on making another function in the software code that was called during options processing, and changed a static variable in the software code so that it would store the input file right away so I wouldn't have to pass it in during the calling of the random functions.
+
+void set_file(char *file) {
+    // printf("setting file");
+    urandstream = fopen(file, "r");
+    if (!urandstream) {
+        printf("fopen urandstream failed");
+        abort();
+    }
+}
+
+I also ran into an abort issue but that ended up being caused by misplaced brackets after an if statement. This is why when I write if statements, that I like to always use the brackets even if it starts as one line long.
+
+For output, I basically copied my handleinput function so that I can just pass in whatever is being output to validate and process it, which made it pretty easy.
+

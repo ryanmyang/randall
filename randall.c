@@ -50,7 +50,7 @@ main (int argc, char **argv)
 {
   /* Check arguments.  */
 
-
+  // printf("main");
   struct options o;
   parse_options(&o,argc,argv);
 
@@ -60,6 +60,9 @@ main (int argc, char **argv)
   if (!valid)
     {
       fprintf (stderr, "%s: usage: %s NBYTES\n", argv[0], argv[0]);
+      fprintf (stderr, "%s: usage: %s NBYTES -i [INPUT OPTION]\n", argv[0], argv[0]);
+      fprintf(stderr, "%s: usage: %s NBYTES -o [OUTPUT OPTION]\n", argv[0], argv[0]);
+
       return 1;
     }
 
@@ -74,7 +77,7 @@ main (int argc, char **argv)
   void (*finalize) (void);
 
 const int input_option = o.input_option;
-printf("input_option: %d \n", input_option);
+// printf("input_option: %d \n", input_option);
 assert(input_option>=0 && input_option<=2);
 
   if (input_option==0)

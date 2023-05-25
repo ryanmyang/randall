@@ -69,4 +69,6 @@ check: randall
 	@echo "Running tests..."
 	./randall 10 | wc -c | grep -q '^10$$' && echo "Length 10 test valid" || echo "Length 10 test failed"
 	./randall 453 | wc -c | grep -q '^453$$' && echo "Length 453 test valid" || echo "Length 453 test failed"
+	./randall 180 -i rdrand | wc -c | grep -q '^180$$' && echo "rdrand 180 test valid" || echo "rdrand 180 test failed"
+
 

@@ -8,27 +8,35 @@
 /* Input stream containing random bytes.  */
 static FILE *urandstream;
 
-/* Initialize the software rand64 implementation.  */
-void
-software_rand64_init(void)
-{
-    urandstream = fopen("/dev/random", "r");
-    if (!urandstream)
+void set_file(char *file) {
+    // printf("setting file");
+    urandstream = fopen(file, "r");
+    if (!urandstream) {
+        fprintf(stderr,"fopen urandstream failed for %s", file);
         abort();
+    }
+}
+
+    /* Initialize the software rand64 implementation.  */
+void software_rand64_init(void)
+{
+    
 }
 
 /* Return a random value, using software operations.  */
 unsigned long long
 software_rand64(void)
 {
-
     unsigned long long int x;
 
     // if mrand48_r
     // x = mrand48_r()
 
-    if (fread(&x, sizeof x, 1, urandstream) != 1)
+    if (fread(&x, sizeof x, 1, urandstream) != 1) {
+        fprintf(stderr, "fread urandstream failed");
         abort();
+
+    }
 
 
     return x;
@@ -41,19 +49,47 @@ software_rand64_fini(void)
     fclose(urandstream);
 }
 
-void software_mrand48_init(void) {
-    
 
+// Init mrand48
+
+static struct drand48_data randomBuffer;
+
+// Function to initialize the random number generator
+void software_mrand48_init()
+{
+    FILE *randomFile = fopen("/dev/random", "rb");
+    if (randomFile == NULL)
+    {
+        perror("Failed to open /dev/random");
+        abort();
+    }
+
+    unsigned short seed[3];
+    size_t bytesRead = fread(seed, sizeof(unsigned short), 3, randomFile);
+    if (bytesRead != 3)
+    {
+        perror("Failed to read from /dev/random");
+        fclose(randomFile);
+        abort();
+    }
+
+    fclose(randomFile);
+
+    // Seed the random number generator
+    seed48_r(seed, &randomBuffer);
 }
-unsigned long long software_mrand48(void) {
-    unsigned long long int x;
-    short int arr[3] = {1,2,3};
-    struct drand48_data buffer;
-    seed48_r(arr, &buffer);
-    mrand48_r(&buffer, &x);
-    return x;
+
+// Function to generate a random long long
+unsigned long long software_mrand48()
+{
+    unsigned long randomValue;
+    mrand48_r(&randomBuffer, (long *)&randomValue);
+    // printf("mrand48 randomValue: %d \n", randomValue);
+    return randomValue;
 }
 
-void software_mrand48_fini(void) {
-
+// Function to perform any necessary cleanup
+void software_mrand48_fini()
+{
+    // No cleanup needed in this case
 }
